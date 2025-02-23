@@ -4,10 +4,10 @@
 
 This repository provides an API for managing VPC resources. It exposes two endpoints:
 
-1: POST /vpc - Creates a new VPC resource.
-2: GET /vpc/{orderId} - Fetches details of an existing VPC resource.
+* 1: POST /vpc - Creates a new VPC resource.
+* 2: GET /vpc/{orderId} - Fetches details of an existing VPC resource.
 
-The API follows an asynchronous architecture, using AWS services like API Gateway, Lambda, DynamoDB, and Step Functions.
+The API follows an asynchronous architecture, using AWS services like API Gateway, Cognito Lambda, DynamoDB, and Step Functions.
 
 ## Architecture
 
@@ -24,6 +24,8 @@ The API is designed with the following AWS components:
 * DynamoDB: Stores VPC order and resource details.
 
 * Step Functions: Manages the VPC creation workflow asynchronously.
+
+* AWS Cognito: Authenticate exposed endpoints using AWS Cognito.
 
 ## Directory structure
 
@@ -66,7 +68,7 @@ Endpoint: POST /vpc
 
 Endpoint: GET /vpc/{orderId}
 
-* Description: Retrieves details of a VPC creation order.
+* Description: Retrieves details of a VPC resources.
 
 * Response (Example):
 ```bash
@@ -76,28 +78,28 @@ Endpoint: GET /vpc/{orderId}
     "vpcOrderCreationDate": "2025-02-23 17:11:31",
     "vpcName": "test",
     "orderId": "05613a0d-8796-4e55-a07a-789789ffcac3",
-    "vpcId": "vpc-0a67615fb366330e2",
+    "vpcId": "vpc-xxxxxxxxxxxxxxxx",
     "subnetDetail": [
         {
-            "subnetId": "subnet-01d15d7dc5bb3e857",
+            "subnetId": "subnet-XXXXXXXXX",
             "subnetZone": "eu-central-1a",
             "subnetSize": "10.0.0.0/20",
             "subnetTier": "public"
         },
         {
-            "subnetId": "subnet-09da0b7a5c67fdc09",
+            "subnetId": "subnet-YYYYYYYY",
             "subnetZone": "eu-central-1b",
             "subnetSize": "10.0.16.0/20",
             "subnetTier": "public"
         },
         {
-            "subnetId": "subnet-0e609d4550fc78a51",
+            "subnetId": "subnet-ZZZZZZZZZ",
             "subnetZone": "eu-central-1a",
             "subnetSize": "10.0.32.0/20",
             "subnetTier": "private"
         },
         {
-            "subnetId": "subnet-0c6ca06558afa6295",
+            "subnetId": "subnet-AAAAAAAAA",
             "subnetZone": "eu-central-1b",
             "subnetSize": "10.0.48.0/20",
             "subnetTier": "private"
