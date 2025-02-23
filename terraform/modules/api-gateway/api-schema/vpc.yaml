@@ -1,0 +1,321 @@
+openapi: 3.0.1
+info:
+  title: Product API for Create VPC
+  version: "/v1"
+  description: |-
+    This API enables customers to create and get vpc details.
+tags:
+  - name: CreateVPCOrder
+    description: API main function to provide vpc creation. 
+  - name: GetVPC
+    description: API main function to get vpc details.   
+x-amazon-apigateway-request-validators:
+  validate-body-only:
+    validateRequestBody: true
+    validateRequestParameters : false
+paths:
+  /vpc:
+    post:
+      operationId: CreateVPCOrder
+      tags:
+        - CreateVPCOrder
+      description: Create a VPC Order. 
+      summary: Create a VPC Order.
+      requestBody:
+        required: true
+        content:
+          $default:
+            schema:
+              $ref: '#/components/schemas/createVPCOrderRequest'
+            examples:
+                CreateVPCParameter:
+                  summary: Create VPC parameters
+                  value:
+                      cidr_block: "10.0.0.0/16"
+                      region_name: "eu-central-1"
+      security:
+      - create-vpc-gateway-authorizer: []                     
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${create_vpc_order_arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type: "aws_proxy"
+      responses:
+        '200':
+          description: OK
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createVPCOrderResponse'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '503':
+          $ref: '#/components/responses/Error503'
+      x-amazon-apigateway-request-validator: 'validate-body-only'
+  /vpc/{vpcOrderId}:
+    get: 
+      operationId: getVPC
+      tags:
+        - GetVPC
+      summary: Return vpc details.
+      parameters:
+        - name: vpcOrderId
+          in: path
+          description: ID of the vpcOrder
+          required: true
+          schema:
+            type: string
+            example: vpc-xxxxxx
+      security:
+      - create-vpc-gateway-authorizer: [] 
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${get_vpc_lambda_arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "GET"
+        type: "aws_proxy"
+      responses:
+        '200':
+          description: OK
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getVPCResponse'
+              examples:
+                booking-ordered:
+                      summary: vpc order status
+                      value:
+                          vpcId: vpc-xxxxxx
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '503':
+          $ref: '#/components/responses/Error503'
+components:
+  responses:
+    Error400:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            InvalidAction:
+              summary: InvalidAction
+              value:
+                errorCode: 400
+                errorType: InvalidAction
+                errorReason: 'The action or operation requested is invalid. Verify that the action is typed correctly.'
+            InvalidParameterValue:
+              summary: InvalidParameterValue
+              value:
+                errorCode: 400
+                errorType: InvalidParameterValue
+                errorReason: 'An invalid or out-of-range value was supplied for the input parameter.'
+            InvalidQueryParameter:
+              summary: InvalidQueryParameter
+              value:
+                errorCode: 400
+                errorType: InvalidQueryParameter
+                errorReason: 'The query string is malformed or does not adhere to the specification.'
+            MissingParameter:
+              summary: MissingParameter
+              value:
+                errorCode: 400
+                errorType: MissingParameter
+                errorReason: 'A required parameter for the specified action is not supplied.'
+            ValidationError:
+              summary: ValidationError
+              value:
+                errorCode: 400
+                errorType: ValidationError
+                errorReason: 'The input fails to satisfy the constraints specified by the service.'
+    Error401:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            MissingAuthentication:
+              summary: MissingAuthentication
+              value:
+                errorCode: 401
+                errorType: MissingAuthentication
+                errorReason: 'The request must contain a valid access token.'
+    Error403:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            NotAuthorized:
+              summary: NotAuthorized
+              value:
+                errorCode: 403
+                errorType: NotAuthorized
+                errorReason: 'You do not have permission to perform this action.'
+    Error404:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            MalformedQueryString:
+              summary: MalformedQueryString
+              value:
+                errorCode: 404
+                errorType: MalformedQueryString
+                errorReason: 'The query string contains a syntax error.'
+    Error429:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            ThrottlingException:
+              summary: ThrottlingException
+              value:
+                errorCode: 429
+                errorType: ThrottlingException
+                errorReason: 'The request was denied due to request throttling.'
+    Error500:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            InternalFailure:
+              summary: InternalFailure
+              value:
+                errorCode: 500
+                errorType: InternalFailure
+                errorReason: 'The request processing has failed because of an unknown error, exception or failure.'
+    Error503:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            ServiceUnavailable:
+              summary: ServiceUnavailable
+              value:
+                errorCode: 503
+                errorType: ServiceUnavailable
+                errorReason: 'The request has failed due to a temporary failure of the server.'
+  schemas:
+    errorResponse:
+      type: object
+      properties: 
+        errorCode:
+          type: string
+          default: 400
+        errorType:
+          type: string
+        errorReason:
+          type: string
+      required:
+        - errorCode
+        - errorType
+        - errorReason
+    createVPCOrderRequest:
+      properties: 
+        cidr_block:
+          type: string
+          description: VPC Id.
+          example: "vpc-xxxxxx"
+        region_name:
+          type: string
+          description: Name of the AWS region.
+          example: "eu-central-1"
+      required:
+        - cidr_block
+        - region_name
+    createVPCOrderResponse:
+      properties:
+        vpcOrderId:
+          type: string
+          description: Unique order ID that can be used to retrive the details of the vpc. 
+          example: "12512-2424-242423"
+    getVPCResponse:
+      properties: 
+        cidrBlock:
+          type: string
+          description: vpc cidr block.
+          example: "10.0.0.0/16"
+        vpcOrderCreationDate:
+          type: string
+          description: VPC order creation time.
+          example: "YYYY-MM-DD hh:mm:ss"
+        vpcName:
+          type: string
+          description: AWS VPC Name.
+          example: "test"
+        orderId:
+          type: string
+          description: VPC order creation id.
+          example: "123412-23123-12312-1212"  
+        vpcId:
+          type: string
+          description: AWS VPC Id.
+          example: "vpc-xxxxxx"  
+        regionName:
+          type: string
+          description: AWS Region Name.
+          example: "eu-central-1" 
+        subnetDetail:
+          type: object
+          description: AWS subnet details.
+
+  securitySchemes:
+    create-vpc-gateway-authorizer:
+      type: "apiKey"
+      name: "Authorization"
+      in: "header"
+      x-amazon-apigateway-authtype: "cognito_user_pools"
+      x-amazon-apigateway-authorizer:
+        providerARNs: ["${cognito_userpool_arn}"]
+        type: "cognito_user_pools"   

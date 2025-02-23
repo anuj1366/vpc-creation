@@ -1,0 +1,20 @@
+{
+  "StartAt": "create vpc resources",
+  "States": {
+    "create vpc resources": {
+      "Type": "Task",
+      "InputPath": "$",
+      "Resource": "${create_vpc_lambda}",
+      "Parameters": {
+        "input.$": "$",
+        "ExecutionId.$": "$$.Execution.Id",
+        "StartTime.$": "$$.Execution.StartTime"
+      },
+      "ResultPath": "$.context",
+      "Next": "Job finished"
+    },
+    "Job finished": {
+      "Type": "Succeed"
+    }
+  }
+}
